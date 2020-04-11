@@ -275,3 +275,45 @@ It will save time for us.
 
 *****************************************************************************************************************************
 API Gateway(Zuul):
+*****************************************************************************************************************************
+1. Zuul act as API Gateway. All requests are routed through zuul.
+
+2. Zuul also connects to Eureka to Find the Microservices.
+
+3.  In an API gateway pattern, you have an API gateway server that comes in between the client and the services.
+
+*****************************************************************************************************************************
+Configuration:
+
+1. Create new Spring boot Project.
+
+	 a)Add spring-cloud-starter-netflix-zuul dependency.
+
+	 b) Add Cloud Config Client Dependency.
+
+	 c) Add Eureka Discovery Client.
+ 
+2. Add annotations:
+
+	a) Add @EnableZuulProxy for Zuul
+	
+	b) Add @EnableDiscoveryClient for contacting Eureka
+	
+3. bootstrap.properties
+
+	Add properties for Config Server for contacting like in all other microservices.
+
+4. application.properties
+
+	server.port=3333
+spring.application.name=ZuulServer
+
+zuul.routes.customer_profile.path=/customers/*
+zuul.routes.customer_profile.strip-prefix=false
+zuul.routes.customer_profile.service-id=CUSTOMER
+
+eureka.client.service-url.defaultZone=http://localhost:4444/eureka
+
+Zuul automatically uses Ribbon.
+
+*******************************************************************************************************************************
