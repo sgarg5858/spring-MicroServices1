@@ -317,3 +317,39 @@ eureka.client.service-url.defaultZone=http://localhost:4444/eureka
 Zuul automatically uses Ribbon.
 
 *******************************************************************************************************************************
+Feign Client:
+
+We have been use Rest Template fot taling to other microservices.Problems with Rest Template:
+
+1. You have to be aware of the various methods of the Rest Template API to use it.
+
+2. You need a separate bean for Load balancing
+
+3. You need a separate service for Circuit breaker
+
+4. The header details of a request from Zuul are not forwarded to the other microservices using RestTemplate
+
+What Is Feign Client?
+
+Feign is a declarative Client From Netflix.At runtime, Feign will create an implementation for our interfaces automatically. 
+
+Thus with minimal code and self made interfaces, we can have greater control over how one microservice communicates with the other.
+**********************************************************************************************************************************
+Configuration:
+
+1. First Add Dependency for Feign Client: 
+
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-feign</artifactId>
+    <version>1.4.7.RELEASE</version>
+</dependency>
+
+2.@ EnableFeignClients in A 
+
+3. Create new Interface in Controller of A with annotation @FeignClient
+
+4. @Autowire Interface bean whose implementation will be provided at run time and replace resttemplate
+
+List<Long> friends1=friendFeign.getSpecificFriends(phoneNo);
+	
