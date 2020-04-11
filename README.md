@@ -181,3 +181,97 @@ Service Discovery(Eureka):
     
     
 **************************************************************************************************************************
+Adding Resilience Using Hystrix:
+
+Service A contacts service B but due to some network issue or server is slow service A is unable to contact Service B.
+
+If we keep sending the requests to B thinking that it will start working after some time, that is insanity. 
+
+We need to add resilience to our application such that the application can deal with such error situations.
+
+A try-catch block can handle errors. But if a request is repeatedly causing an error, should the request even be continued to be sent?
+
+Let's look at CASCADING FAILURE:
+
+Let us say that Service D has become slow. Thus the requests to service D start queuing up.
+
+A  ->  B  -> C -> -> -> -> D
+
+More arrows means more requests:
+
+Because of this latency, the requests start queuing up in all the related services slowing everything down. This is a cascading failure.
+
+A  -> ->  -> -> ->  B -> -> -> ->  -> C -> -> -> -> D
+
+Solution:
+1. The better approach would be that if a particular service is taking more time than usual, then don’t send any more requests to that 
+
+service. Stop requests to that service.
+
+This prevents an increase in the slowing down of other services.
+
+A -> B -> C (stop) D
+
+2. This Above is similar to Cirucit Break Pattern when high voltage fuse causes the circut open saving all appliances.
+
+ when the numbers of failures in a given time frame are more. Hystrix uses the Fail Fast approach. It is better to fail fast than to 
+ 
+ fail big time later.
+ 
+ 3. After opening the Circuit, Hystrix will attempt to close the circuit again
+ 
+ 4. The error threshold, waiting time, retry attempts, etc are all configurable in Hystrix.
+ 
+ Fallback:
+ 
+ 1.Hystrix allows you to mention any alternate piece of code that you wish to run if a service is down. 
+ 
+ 2.Obviously you don’t get the same result as you wish you had. But, providing some form of data instead of an error is better.
+ 
+ Fallback executes when:
+
+An error occurs
+
+A timeout occurs
+
+Circuit opens
+
+*********************************************************************************************************************
+
+ How to Configure Hystrix in MicroService?
+ 
+ 1. Add Dependency in A of   (spring-cloud-starter-netflix-hystrix).
+ 
+ 2. Add @EnableCircuitBreaker in Application.java file of Microservice A.
+ 
+ 3. Add @HystrixCommand(fallback="FallbackMethodName") and implement what you want to do when original method fails.
+ 
+ 4. Now time to Add Configuration for Hystrix in application.properties
+  
+    min 4 requests  with in 10 sec must be sent  and 50 % of the request fails then circuit breaker kicks in
+    
+    a) hystrix.command.default.circuitBreaker.requestVolumeThreshold=4
+      
+    b)  hystrix.command.default.metrics.rollingStats.timeInMilliseconds=10000
+   
+    c)  hystrix.command.default.circuitBreaker.errorThresholdPercentage=50
+   
+    d)  hystrix.command.default.circuitBreaker.sleepWindowInMilliseconds=60000
+    
+    Once circuit is open then for how many time it must be in open state and after that it should try to send request
+
+    When Cirucit is open it will only go To Fallback Method ! After 60 sec's it will test for only 1 request if fails then again opens 
+    
+    th circuit for 60 seconds.
+    
+    e) Default time out for hystrix is 1 sec. 1000 ms.
+    
+******************************************************************************************************************************
+Synchronous Communication:
+
+Microservice A call B and C and both these calls are independent.when calls are idependent we can make calls asynchronously.
+
+It will save time for us.
+
+*****************************************************************************************************************************
+API Gateway(Zuul):
