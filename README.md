@@ -1,7 +1,7 @@
 # Spring-MicroServices1
 
 *************************************************************************************************************************
-ConfigServer
+# ConfigServer
 ************************************************************************************************************************
 
 
@@ -75,63 +75,7 @@ iv) Usually we deploy multiple instances of ConfigServer to ensure high availbil
 That's all for ConfigServer.
 
 ********************************************************************************************************************************
-Load Balancer(Ribbon):
-********************************************************************************************************************************
-It is of Two types:
-			1. Hardware type (not preffered)
- 				
-			2. Software type.
-			
-1. Suppose we are calling microservice b from a and there is surge on b and we want to deploy multiple instances of b and we want 
-	
-  to balance the load between instances of b.So for this we have to do the configuration at microservice a which will handle it.
-  
-2. Add   org.springframework.cloud spring-cloud-starter-netflix-ribbon in microservice a;
-
-3. After adding this dependency we have to make configuration class with annotation @Configration.
-
-	@Bean @LoadBalanced 
-	
-	public RestTemplate restTemplate() 
-	
-		{ return new RestTemplate(); }
-		
-4. Add  @Autowired 
-	RestTemplate template;  where are calling the mciroservice b in a;
-	
-5. Add @RibbonClient(name="custribbon")
-
-6. If we are not using Eureka then use the below otherwise we will see in next section for how to make call to microservice b and how to
-
-   get the instances.
-   
-   a) custribbon.ribbon.eureka.enabled=false 
-   
-   b) custribbon.ribbon.listOfServers=http://localhost:8301,http://localhost:8302 //port no for instances
-   
-7. List friends = template.getForObject("http://custribbon/customers/" + phoneNo+"/friends", List.class);
-
-This will get all instances of service b and will balance load accross them.
-
-Here we know where the microservices are deployed but in real life scenario we won't know as cloud provider can deploy them on any
-
-random port and the port for them can change from time to time. This is Where Service-Discovery(Eureka) Comes in .
-
-8. By Default Ribbon Opts for NoOPing Strategy for the services to check if they are up.However, NoOpPing is a dummy strategy. It 
-
-assumes that all services are up. Thus it will keep pinging the services even if they are down.
-
-By default ribbon uses round robin manner.
-
-Using Below property it will ping the service for some period and after that it will stop pinging.
-
-
-custribbon.default.NFLoadBalancerRuleClassName=com.netflix.loadbalancer.RandomRule
-
-
-
-*************************************************************************************************************************************
-Service Discovery(Eureka):
+# Service Discovery(Eureka):
 *************************************************************************************************************************************
     Every Microservice registers itself with Eureka which means eureka knows the changes in port no but the name of microservice stays 
     
@@ -181,7 +125,7 @@ Service Discovery(Eureka):
     
     
 **************************************************************************************************************************
-Adding Resilience Using Hystrix:
+# Adding Resilience Using Hystrix:
 
 Service A contacts service B but due to some network issue or server is slow service A is unable to contact Service B.
 
@@ -267,14 +211,14 @@ Circuit opens
     e) Default time out for hystrix is 1 sec. 1000 ms.
     
 ******************************************************************************************************************************
-Synchronous Communication:
+# Synchronous Communication:
 
 Microservice A call B and C and both these calls are independent.when calls are idependent we can make calls asynchronously.
 
 It will save time for us.
 
 *****************************************************************************************************************************
-API Gateway(Zuul):
+# API Gateway(Zuul):
 *****************************************************************************************************************************
 1. Zuul act as API Gateway. All requests are routed through zuul.
 
@@ -317,7 +261,7 @@ eureka.client.service-url.defaultZone=http://localhost:4444/eureka
 Zuul automatically uses Ribbon.
 
 *******************************************************************************************************************************
-Feign Client:
+# Feign Client:
 
 We have been use Rest Template fot taling to other microservices.Problems with Rest Template:
 
@@ -353,3 +297,20 @@ Configuration:
 
 List<Long> friends1=friendFeign.getSpecificFriends(phoneNo);
 	
+*******************************************************************************************************************
+# Slueth(Tracing)
+
+1. Spring Cloud Sleuth is one of the projects under Spring Cloud which allows us to trace a request.
+
+2. Sleuth adds two things: a traceId and a spanId in our logs. TraceId is a unique ID generated for every request. 
+
+3. Span ID is a unique ID generated for the span or path of a single microservice. So if a request flows through two microservices,
+
+   it will have one TraceId and two SpanId's.
+   
+   Configuration: Add In All MicroServices
+   
+ 
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+			
+********************************************************************************************************************
